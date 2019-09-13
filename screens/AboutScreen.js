@@ -79,7 +79,7 @@ export default class LinksScreen extends React.PureComponent {
 }
 
 LinksScreen.navigationOptions = {
-  title: 'About',
+  title: 'Settings',
 };
 
 const styles = StyleSheet.create({

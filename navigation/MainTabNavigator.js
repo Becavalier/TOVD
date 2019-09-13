@@ -19,7 +19,7 @@ const HomeStack = createStackNavigator(
 );
 
 HomeStack.navigationOptions = {
-  tabBarLabel: 'Records',
+  tabBarLabel: 'Notes',
   tabBarIcon: ({ focused }) => (
     <Icon
       focused={focused}
@@ -41,9 +41,9 @@ const AboutStack = createStackNavigator(
 );
 
 AboutStack.navigationOptions = {
-  tabBarLabel: 'About',
+  tabBarLabel: 'Settings',
   tabBarIcon: ({ focused }) => (
-    <Icon focused={focused} name={Platform.OS === 'ios' ? 'ios-person' : 'md-person'} />
+    <Icon focused={focused} name={Platform.OS === 'ios' ? 'ios-settings' : 'md-settings'} />
   ),
 };
 AboutStack.path = '';

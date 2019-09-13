@@ -96,9 +96,11 @@ export default class HomeScreen extends React.PureComponent {
         this.setState({
           sectionsData: formatInitData(value, 'date'),
           storageRawData: value,
-          onDataRefreshing: false,
         });
       }
+      this.setState({
+        onDataRefreshing: false,
+      });
     });
   }
 
