@@ -11,7 +11,7 @@ export default function ContentBubble(props) {
       <View style={styles.bubbleContiner}>
         <Text>{props.content}</Text>
         <View style={styles.horizontalLine}></View>
-        <Text>{props.translation || 'Unknown'}</Text>
+        <Text style={styles.translation}>{props.translation || 'Unknown'}</Text>
       </View>
     </View>
   );
@@ -39,5 +39,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(0, 0, 0, 0.1)',
     borderBottomWidth: 1,
   },
-  button: {}
+  translation: {
+    lineHeight: 18
+  }
 });
