@@ -27,10 +27,19 @@ public class AppConstants {
         
         
         
+        
+        
+        
+        
+        
+        
+        
+        
+        
         // ADD EMBEDDED RESPONSES HERE
         // START EMBEDDED RESPONSES
         embeddedResponses.add(new Constants.EmbeddedResponse("https://exp.host/@becavalier/TOVDiary", "assets://shell-app-manifest.json", "application/json"));
-        embeddedResponses.add(new Constants.EmbeddedResponse("https://d1wp6m56sqw74a.cloudfront.net/%40becavalier%2FTOVDiary%2F1.0.0%2Ff131fc16ec7e92cff3eda1c8fced816d-34.0.0-android.js", "assets://shell-app.bundle", "application/javascript"));
+        embeddedResponses.add(new Constants.EmbeddedResponse("https://d1wp6m56sqw74a.cloudfront.net/%40becavalier%2FTOVDiary%2F1.0.0%2F036120619c180e7fdddfc0c41f776937-34.0.0-android.js", "assets://shell-app.bundle", "application/javascript"));
         // END EMBEDDED RESPONSES
     EMBEDDED_RESPONSES = embeddedResponses;
   }

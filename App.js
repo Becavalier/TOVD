@@ -1,11 +1,27 @@
 import { AppLoading } from 'expo';
 import * as Font from 'expo-font';
 import React, { useState } from 'react';
-import { Platform, StatusBar, StyleSheet, View } from 'react-native';
+import { 
+  Platform, 
+  StatusBar, 
+  StyleSheet,
+  UIManager,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-
 import AppNavigator from './navigation/AppNavigator';
+import SignInModal from './components/SignInModal';
+import SignUpModal from './components/SignUpModal';
+import ReviewModal from './components/ReviewModal';
+import ReduxConnect from './components/ReduxConnect';
+import { Provider } from 'react-redux';
+import store from './redux/store';
 
+if (
+  Platform.OS === 'android' &&
+  UIManager.setLayoutAnimationEnabledExperimental
+) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 export default function App(props) {
   const [isLoadingComplete, setLoadingComplete] = useState(false);
 
@@ -19,10 +35,15 @@ export default function App(props) {
     );
   } else {
     return (
-      <View style={styles.container}>
-        {Platform.OS === 'ios' && <StatusBar barStyle="default" />}
-        <AppNavigator />
-      </View>
+      <Provider store={store}>
+        <ReduxConnect style={styles.container} isLoadingComplete={isLoadingComplete}>
+          {Platform.OS === 'ios' && <StatusBar barStyle="default" />}
+          <AppNavigator />
+          <SignInModal />
+          <SignUpModal />
+          <ReviewModal />
+        </ReduxConnect>
+      </Provider>
     );
   }
 }

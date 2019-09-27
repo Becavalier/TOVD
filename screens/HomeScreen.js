@@ -9,10 +9,9 @@ import {
   Alert,
   Platform,
   Keyboard,
-  UIManager,
   LayoutAnimation,
   InputAccessoryView,
-  Button
+  Button,
 } from 'react-native';
 import Icon from '../components/Icon';
 import { SwipeListView, SwipeRow } from 'react-native-swipe-list-view';
@@ -21,11 +20,20 @@ import dayjs from 'dayjs';
 import translate from '../services/Translate';
 import { 
   fetchPersistentData, 
-  savePersistentData 
+  savePersistentData,
 } from '../services/LocalStorage';
+import { connect } from 'react-redux';
+import { 
+  toggleKeyboardAvoidingView, 
+  toggleSyncingState, 
+  setSignOutStatus,
+  syncAppDataToServer, 
+  toggleDataInitializedState,
+  toggleReviewModal,
+} from "../redux/actions";
 import animation from '../configurations/Animations';
+import { STORAGE_DATA_KEY } from '../configurations/Constants';
 
-const STORAGE_DATA_KEY = 'TOVD_RECORDS';
 const STORAGE_LANG_KEY = 'TOVD_LANG';
 const INPUT_ACCESSORY_VIEW_ID = "INPUT_ACCESSORY_VIEW";
 
@@ -38,13 +46,7 @@ const formatInitData = (data, sortField) => {
   })
 }
 
-if (
-  Platform.OS === 'android' &&
-  UIManager.setLayoutAnimationEnabledExperimental
-) {
-  UIManager.setLayoutAnimationEnabledExperimental(true);
-}
-export default class HomeScreen extends React.PureComponent {
+class HomeScreen extends React.PureComponent {
   constructor(props) {
     super(props);
 
@@ -61,21 +63,36 @@ export default class HomeScreen extends React.PureComponent {
   }
 
   componentDidMount = async () => {
-    this.initDataLoading();
-
-    // listeners;
-    this.keyboardDidShowListener = Keyboard.addListener('keyboardWillShow', (event) => {
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.spring);
-      this.setState({
-        keyboardOffset: event.endCoordinates.height - 80
-      });
+    // page listeners;
+    this.props.navigation.addListener('willFocus', e => {
+      this.props.toggleKeyboardAvoidingView(false);
     });
 
-    this.keyboardDidHideListener = Keyboard.addListener('keyboardWillHide', () => {
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.spring);
-      this.setState({
-        keyboardOffset: 0
-      });
+    this.props.navigation.addListener('willBlur', e => {
+      this.props.toggleKeyboardAvoidingView(true);
+    });
+
+    // global listeners;
+    this.keyboardDidShowListener = Keyboard.addListener('keyboardWillShow', (e) => {
+      const { isFocused } = this.props.navigation;
+
+      if (isFocused()) {
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.spring);
+        this.setState({
+          keyboardOffset: e.endCoordinates.height - 80,
+        });
+      }
+    });
+
+    this.keyboardDidHideListener = Keyboard.addListener('keyboardWillHide', (e) => {
+      const { isFocused } = this.props.navigation;
+
+      if (isFocused()) {
+        LayoutAnimation.configureNext(LayoutAnimation.Presets.spring);
+        this.setState({
+          keyboardOffset: 0,
+        });
+      }
     });
   }
 
@@ -89,7 +106,7 @@ export default class HomeScreen extends React.PureComponent {
   // public methods;
   initDataLoading = () => {
     this.setState({
-      onDataRefreshing: true,
+      onDataRefreshing: true, 
     }, async () => {
       const value = await fetchPersistentData(STORAGE_DATA_KEY);
       if (value) {
@@ -102,6 +119,18 @@ export default class HomeScreen extends React.PureComponent {
         onDataRefreshing: false,
       });
     });
+  }
+
+  componentWillReceiveProps(props) {
+    const { initializedData, hasDataInitialized } = props; 
+    if (initializedData && !hasDataInitialized) {
+      this.setState({ 
+        sectionsData: formatInitData(initializedData, 'date'),
+        storageRawData: initializedData,
+        onDataRefreshing: false,
+      });
+      this.props.toggleDataInitializedState(true);
+    }
   }
 
   reachTheBottom = () => {
@@ -143,7 +172,7 @@ export default class HomeScreen extends React.PureComponent {
             // remove element;
             const rawDataUpdated = storageRawData.filter(i => i.index !== item.index);
 
-            LayoutAnimation.configureNext(animation.layout.easeInEaseOut);
+            LayoutAnimation.configureNext(animation(200).layout.easeInEaseOut);
             this.setState({
               sectionsData: formatInitData(rawDataUpdated, 'date'),
               storageRawData: rawDataUpdated,
@@ -161,9 +190,7 @@ export default class HomeScreen extends React.PureComponent {
   }
 
   syncTextMessage(inputText) {
-    this.setState({
-      inputText
-    });
+    this.setState({ inputText });
   }
 
   submitNewItem = async () => {
@@ -176,18 +203,19 @@ export default class HomeScreen extends React.PureComponent {
     const rawDataUpdated = [].concat(storageRawData,  {
       content: inputText,
       translation: await translate(inputText, {
-        lang: await fetchPersistentData(STORAGE_LANG_KEY)
+        lang: await fetchPersistentData(STORAGE_LANG_KEY),
       }),
       date: dayjs().format('YYYY-MM-DD'),
       type: 'normal',
-      index: new Date().getTime()
+      index: new Date().getTime(),
     });
 
-    LayoutAnimation.configureNext(animation.layout.easeInEaseOut);
+    LayoutAnimation.configureNext(animation().layout.easeInEaseOut);
     this.setState({ 
       newItemAddedFlag: true,
+      onDataRefreshing: false,
       storageRawData: rawDataUpdated,
-      sectionsData: formatInitData(rawDataUpdated, 'date')
+      sectionsData: formatInitData(rawDataUpdated, 'date'),
     }); 
 
     Keyboard.dismiss();
@@ -205,9 +233,14 @@ export default class HomeScreen extends React.PureComponent {
 
   handleScrollFailed = (e) => {}
 
+  showTrainingPage = () => {
+    this.props.toggleReviewModal(true);
+  }
+
   render() {
     const { sectionsData, inputText, keyboardOffset, onDataRefreshing } = this.state;
-
+    const { needReview } = this.props;
+ 
     return (
       <View style={styles.container}>
         { sectionsData.length > 0 ? <SwipeListView 
@@ -219,7 +252,7 @@ export default class HomeScreen extends React.PureComponent {
           recalculateHiddenLayout={true}
           ListFooterComponent={() => 
             <View style={styles.footerComponent}>
-              <Text style={styles.footerTextComponent}>- End -</Text>
+              <Text style={styles.footerTextComponent}>- Till the end, add a new record? -</Text>
             </View>}
           useSectionList
           renderItem={
@@ -252,6 +285,16 @@ export default class HomeScreen extends React.PureComponent {
                     : 'md-infinite'
                 }
               /></View>}
+        { needReview && 
+        <TouchableOpacity style={styles.reviewButton} onPress={this.showTrainingPage}>
+          <Ionicons 
+            name='ios-book'
+            color='#fff'
+            style={{ marginBottom: -3 }}
+            size={25}
+          />
+          <Text style={styles.reviewButtonText}>Start Review</Text>
+        </TouchableOpacity> }
         <View style={{...styles.inputArea, bottom: keyboardOffset}}>
           <TextInput
             ref={this.textInputRef}
@@ -285,6 +328,22 @@ HomeScreen.navigationOptions = {
   header: null,
 };
 
+export default connect(
+  state => ({ 
+    hasSignedIn: state.hasSignedIn,
+    initializedData: state.initializedData, 
+    hasDataInitialized: state.hasDataInitialized,
+    needReview: state.needReview,
+  }), { 
+    toggleKeyboardAvoidingView, 
+    toggleSyncingState, 
+    setSignOutStatus,
+    syncAppDataToServer,
+    toggleDataInitializedState,
+    toggleReviewModal,
+  }
+)(HomeScreen);
+
 const styles = StyleSheet.create({
   container: {
     position: 'relative',
@@ -303,7 +362,8 @@ const styles = StyleSheet.create({
   },
   footerTextComponent: {
     fontWeight: '200',
-    color: '#777'
+    color: '#777',
+    fontSize: 13,
   },
   swipeListView: {
     position: 'absolute',
@@ -317,7 +377,7 @@ const styles = StyleSheet.create({
     alignItems: 'center'
   },
   sectionHeader: {
-    backgroundColor: '#102E37',
+    backgroundColor: '#444',
     padding: 5,
     color: '#fff'
   },
@@ -335,6 +395,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flex: 1,
     justifyContent: 'center'
+  },
+  reviewButton: {
+    flex: 1,
+    position: 'absolute',
+    bottom: 80,
+    backgroundColor: '#63b931',
+    borderRadius: 10,
+    padding: 5,
+    width: 230,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  reviewButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 20,
   },
   inputArea: {
     shadowColor: 'rgba(0, 0, 0, .2)',
@@ -361,7 +437,7 @@ const styles = StyleSheet.create({
   },
   submitButtonView: {
     width: 70,
-    backgroundColor: '#222831',
+    backgroundColor: '#111',
     alignItems: 'center',
     justifyContent: 'center'
   },

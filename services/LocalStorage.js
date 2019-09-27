@@ -2,21 +2,21 @@ import {
   AsyncStorage
 } from 'react-native';
 
-export const fetchPersistentData = async (key) => {
+export const fetchPersistentData = async (key, decodeJSON = true) => {
   try {
-    const value = JSON.parse(await AsyncStorage.getItem(key));
-    return value.data;
+    const value = await AsyncStorage.getItem(key);
+    return decodeJSON ? JSON.parse(value).data : value;
   } catch (e) {
     return false;
   }
 }
 
-export const savePersistentData = async (key, data) => {
+export const savePersistentData = async (key, data, encodeJSON = true) => {
   try {
-    await AsyncStorage.setItem(key, JSON.stringify({
-      type: typeof data,
-      data
-    }));
+    const value = encodeJSON ? JSON.stringify({
+      type: typeof data, data,
+    }) : data;
+    await AsyncStorage.setItem(key, value);
   } catch (e) {
     return false;
   }

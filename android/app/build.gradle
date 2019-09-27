@@ -111,6 +111,7 @@ apply from: 'expo.gradle'
 apply from: "../../node_modules/react-native-unimodules/gradle.groovy"
 
 dependencies {
+    implementation project(':react-native-webview')
   implementation fileTree(dir: 'libs', include: ['*.jar'])
 
   implementation 'com.android.support:multidex:1.0.1'

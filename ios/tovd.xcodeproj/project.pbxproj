@@ -23,7 +23,7 @@
 
 /* Begin PBXFileReference section */
 		2C1548D9E4CB1AEFA5CCAE6D /* Pods-tovd.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-tovd.debug.xcconfig"; path = "Pods/Target Support Files/Pods-tovd/Pods-tovd.debug.xcconfig"; sourceTree = "<group>"; };
-		96F33E3C232B85810050441C /* tovd.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = tovd.entitlements; sourceTree = "<group>"; };
+		9653E190233DD3BB0046C81F /* tovd.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = tovd.entitlements; sourceTree = "<group>"; };
 		A47FE4D7F70906B7DC8CE39B /* Pods-tovd.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-tovd.release.xcconfig"; path = "Pods/Target Support Files/Pods-tovd/Pods-tovd.release.xcconfig"; sourceTree = "<group>"; };
 		B501732A1DC01252003445D9 /* EXShell.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = EXShell.plist; sourceTree = "<group>"; };
 		B56386411DB9693800A0598C /* tovd.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = tovd.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -92,7 +92,7 @@
 		B56386431DB9693800A0598C /* tovd */ = {
 			isa = PBXGroup;
 			children = (
-				96F33E3C232B85810050441C /* tovd.entitlements */,
+				9653E190233DD3BB0046C81F /* tovd.entitlements */,
 				B56386471DB9693800A0598C /* AppDelegate.h */,
 				B56386481DB9693800A0598C /* AppDelegate.m */,
 				B56386501DB9693800A0598C /* Assets.xcassets */,
@@ -156,9 +156,6 @@
 						DevelopmentTeam = ZCHUV29WPM;
 						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
-							com.apple.AccessWiFi = {
-								enabled = 0;
-							};
 							com.apple.Push = {
 								enabled = 1;
 							};
@@ -171,6 +168,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 				Base,
 			);

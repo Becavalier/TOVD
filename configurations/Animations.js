@@ -2,10 +2,10 @@ import {
   LayoutAnimation,
 } from 'react-native';
 
-export default {
+export default (time = 200) => ({
   layout: {
     easeInEaseOut: {
-      duration: 200,
+      duration: time,
       create: {
         type: LayoutAnimation.Types.easeInEaseOut,
         property: LayoutAnimation.Properties.opacity
@@ -17,6 +17,6 @@ export default {
         type: LayoutAnimation.Types.easeInEaseOut,
         property: LayoutAnimation.Properties.opacity
       }
-    }
+    },
   }
-};
+});
