@@ -16,7 +16,7 @@ Then building application from Xcode.
 
 ### Android 
 
-Not support yet.
+(Not support yet)
 
 
 ### Appendix
