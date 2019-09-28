@@ -122,14 +122,17 @@ export const setSignInType = (value) => ({
 
 export const syncAppDataToServer = (data = false) => {
   return async (dispatch) => {
-    dispatch(toggleSyncingState(true));
-    const res = await httpSyncAppData({ 
-      data: data || await fetchPersistentData(STORAGE_DATA_KEY, false),
-    });
-    if (!res.data.tovdSyncAppData.result) {
-      dispatch(setSignOutStatus());
+    const payload = data || await fetchPersistentData(STORAGE_DATA_KEY, false);
+    if (payload) {
+      dispatch(toggleSyncingState(true));
+      const res = await httpSyncAppData({ 
+        data: payload,
+      });
+      if (!res.data.tovdSyncAppData.result) {
+        dispatch(setSignOutStatus());
+      }
+      dispatch(toggleSyncingState(false));
     }
-    dispatch(toggleSyncingState(false));
   }
 }
 

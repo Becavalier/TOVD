@@ -1,9 +1,11 @@
 # TOVD
-A mobile app used for taking notes.
+An iOS mobile app used for practicing English oral interpretation.
+
+App Store: https://apps.apple.com/cn/app/tovd/id1479868644
 
 ### Bundle
 
-`npm run publish`
+`npm run publish-release`
 
 
 ### IOS
@@ -12,8 +14,12 @@ A mobile app used for taking notes.
 
 Then building application from Xcode.
 
-### Appendix
+### Android 
 
+Not support yet.
+
+
+### Appendix
 
 Sometimes you need to setup a proxy for `curl` like tools to download Pods components from the remote server. Take the following codes for instance.
 
