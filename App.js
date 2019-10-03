@@ -6,6 +6,7 @@ import {
   StatusBar, 
   StyleSheet,
   UIManager,
+  Image,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AppNavigator from './navigation/AppNavigator';
@@ -14,6 +15,7 @@ import SignUpModal from './components/SignUpModal';
 import ReviewModal from './components/ReviewModal';
 import ReduxConnect from './components/ReduxConnect';
 import { Provider } from 'react-redux';
+import { Asset } from 'expo-asset';
 import store from './redux/store';
 
 if (
@@ -48,6 +50,16 @@ export default function App(props) {
   }
 }
 
+function cacheImages(images) {
+  return images.map(image => {
+    if (typeof image === 'string') {
+      return Image.prefetch(image);
+    } else {
+      return Asset.fromModule(image).downloadAsync();
+    }
+  });
+}
+
 async function loadResourcesAsync() {
   await Promise.all([
     Font.loadAsync({
@@ -57,6 +69,9 @@ async function loadResourcesAsync() {
       // remove this if you are not using it in your app
       'space-mono': require('./assets/fonts/SpaceMono-Regular.ttf'),
     }),
+    ...cacheImages([
+      require('./assets/images/icon.png'),
+    ]),
   ]);
 }
 
