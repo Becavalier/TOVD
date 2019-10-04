@@ -44,14 +44,11 @@ export default connect(
     useEffect(() => {
       AppState.addEventListener('change', (nextAppState) => {
         if (nextAppState === 'active') {
-          props.syncAppDataAll();
           if (!hasPopRateUs && dayjs().date() === 15 && dayjs().hour() === 21) {
             showRateUs(success => {
               hasPopRateUs = true;
             });
           }
-        } else if (nextAppState === 'inactive') {
-          props.syncAppDataAll();
         }
       });
 

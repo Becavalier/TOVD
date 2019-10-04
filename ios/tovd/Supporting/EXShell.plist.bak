@@ -9,6 +9,6 @@
 	<key>manifestUrl</key>
 	<string>exp://exp.host/@becavalier/TOVDiary</string>
 	<key>releaseChannel</key>
-	<string>prod-v1</string>
+	<string>default</string>
 </dict>
 </plist>

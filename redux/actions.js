@@ -142,11 +142,15 @@ export const checkReviewState = () => {
     const now = new Date().getTime();
     const duration = 1000 * 60 * 60 * 24;
     if ((now - lastSyncDate) >= duration) {
-      const { initializedData } = getState();
-      const reviewData = initializedData.filter(i => (((new Date().getTime() - Number(i.index)) >= duration) && (!i.rt || i.rt <= 5)));
+      const data = await fetchPersistentData(STORAGE_DATA_KEY);
+      const reviewData = data.filter(i => (((new Date().getTime() - Number(i.index)) >= duration) && (!i.rt || i.rt <= 5)));
       if (reviewData.length > 0) {
         await dispatch(toggleNeedReviewState(true));
         await dispatch(setReviewData(reviewData));
+      } else {
+        // reset; 
+        await dispatch(toggleNeedReviewState(false));
+        await dispatch(setReviewData([]));
       }
       dispatch(setLastSyncDate(now));
     }
@@ -181,8 +185,6 @@ export const syncAppDataAll = (callback = false) => {
         await dispatch(setInitializedData(data));
         await dispatch(toggleDataInitializedState(false));
       }
-    } else {
-      await dispatch(syncAppDataToServer());
     }
     await dispatch(checkReviewState());
     await dispatch(toggleSyncingState(false));

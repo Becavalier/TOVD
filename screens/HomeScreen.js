@@ -10,13 +10,13 @@ import {
   Platform,
   Keyboard,
   LayoutAnimation,
-  InputAccessoryView,
+  InputAccessoryView, 
   Button,
 } from 'react-native';
 import Icon from '../components/Icon';
 import { SwipeListView, SwipeRow } from 'react-native-swipe-list-view';
 import { Ionicons } from '@expo/vector-icons';
-import dayjs from 'dayjs';
+import dayjs from 'dayjs'; 
 import translate from '../services/Translate';
 import { 
   fetchPersistentData, 
@@ -30,7 +30,9 @@ import {
   syncAppDataToServer, 
   toggleDataInitializedState,
   toggleReviewModal,
+  syncAppDataAll,
 } from "../redux/actions";
+import { httpInsertNewRecord, httpRemoveRecord } from '../apis/record';
 import animation from '../configurations/Animations';
 import { STORAGE_DATA_KEY } from '../configurations/Constants';
 
@@ -43,7 +45,7 @@ const formatInitData = (data, sortField) => {
       title: key,
       data: data.filter(i => i[sortField] === key)
     }
-  })
+  });
 }
 
 class HomeScreen extends React.PureComponent {
@@ -156,7 +158,7 @@ class HomeScreen extends React.PureComponent {
   deleteItem = (data) => {
     Alert.alert(
       'Confirm',
-      'Are you sure you want to delete this item from local database?',
+      'Are you sure you want to delete this record from your database?',
       [
         {
           text: 'Cancel',
@@ -168,18 +170,24 @@ class HomeScreen extends React.PureComponent {
           onPress: async () => {
             const { item } = data;
             const { storageRawData } = this.state;
-            
-            // remove element;
-            const rawDataUpdated = storageRawData.filter(i => i.index !== item.index);
+            const { result } = (await httpRemoveRecord({
+              index: storageRawData.findIndex(i => i.index === item.index),
+              data: JSON.stringify(item),
+            })).data.tovdRemoveRecord;
+            if (result) {
+              // remove element;
+              const rawDataUpdated = storageRawData.filter(i => i.index !== item.index);
 
-            LayoutAnimation.configureNext(animation(200).layout.easeInEaseOut);
-            this.setState({
-              sectionsData: formatInitData(rawDataUpdated, 'date'),
-              storageRawData: rawDataUpdated,
-            });
+              LayoutAnimation.configureNext(animation(200).layout.easeInEaseOut);
+              this.setState({
+                sectionsData: formatInitData(rawDataUpdated, 'date'),
+                storageRawData: rawDataUpdated,
+              });
 
-            // update;
-            await savePersistentData(STORAGE_DATA_KEY, rawDataUpdated); 
+              // update;
+              await savePersistentData(STORAGE_DATA_KEY, rawDataUpdated);
+              this.props.syncAppDataAll();
+            }
           }
         },
       ],
@@ -199,8 +207,7 @@ class HomeScreen extends React.PureComponent {
     if (!inputText) {
       return;
     }
-    
-    const rawDataUpdated = [].concat(storageRawData,  {
+    const newItemRecord = {
       content: inputText,
       translation: await translate(inputText, {
         lang: await fetchPersistentData(STORAGE_LANG_KEY),
@@ -208,21 +215,26 @@ class HomeScreen extends React.PureComponent {
       date: dayjs().format('YYYY-MM-DD'),
       type: 'normal',
       index: new Date().getTime(),
-    });
+    };
+    const { result } = (await httpInsertNewRecord(newItemRecord)).data.tovdInsertNewRecord;
+    if (result) {
+      const rawDataUpdated = [].concat(storageRawData, newItemRecord);
 
-    LayoutAnimation.configureNext(animation().layout.easeInEaseOut);
-    this.setState({ 
-      newItemAddedFlag: true,
-      onDataRefreshing: false,
-      storageRawData: rawDataUpdated,
-      sectionsData: formatInitData(rawDataUpdated, 'date'),
-    }); 
+      LayoutAnimation.configureNext(animation().layout.easeInEaseOut);
+      this.setState({ 
+        newItemAddedFlag: true,
+        onDataRefreshing: false,
+        storageRawData: rawDataUpdated,
+        sectionsData: formatInitData(rawDataUpdated, 'date'),
+      }); 
 
-    Keyboard.dismiss();
-    this.textInputRef.current.clear();
+      Keyboard.dismiss();
+      this.textInputRef.current.clear();
 
-    // update;
-    await savePersistentData(STORAGE_DATA_KEY, rawDataUpdated); 
+      // update;
+      await savePersistentData(STORAGE_DATA_KEY, rawDataUpdated); 
+      await this.props.syncAppDataAll(); 
+    }
   }
 
   resetInputArea = () => {
@@ -341,6 +353,7 @@ export default connect(
     syncAppDataToServer,
     toggleDataInitializedState,
     toggleReviewModal,
+    syncAppDataAll,
   }
 )(HomeScreen);
 

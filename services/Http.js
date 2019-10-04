@@ -6,15 +6,16 @@ import { TOKEN_STORAGE_KEY } from '../configurations/Constants';
 
 const _axios = axios.create({
   baseURL: 'https://www.yhspy.com/',
+  // baseURL: 'http://localhost:80/',
   timeout: 60 * 1000, 
-  withCredentials: true
+  withCredentials: true 
 });
 
 _axios.interceptors.request.use(async (config) => {
   config.headers = {
     token: await fetchPersistentData(TOKEN_STORAGE_KEY),
   };
-  return config;
+  return config; 
 }, err => {
   return Promise.reject(err);
 });
