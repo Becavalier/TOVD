@@ -25,6 +25,7 @@ const initState = {
   tillLast: false,
   showTranslation: false,
 };
+const DEFAULT_INDEX = 0;
 
 class ReviewModal extends PureComponent {
   static propTypes = {};
@@ -38,7 +39,7 @@ class ReviewModal extends PureComponent {
   componentWillReceiveProps(props) {
     if (props.reviewData && props.reviewData.length > 0) {
       this.setState({
-        reviewData: props.reviewData,
+        reviewData: props.initializedData.filter(i => props.reviewData.includes(i.index)),
         reviewDataLength: props.reviewData.length,
       });
     }
@@ -79,9 +80,12 @@ class ReviewModal extends PureComponent {
     if (reviewDone && counter === reviewData.length - 1) {
       this.props.toggleNeedReviewState(false);
     } 
-
     // sync data;
-    await savePersistentData(STORAGE_DATA_KEY, initializedData);
+    await savePersistentData(STORAGE_DATA_KEY, initializedData, {
+      callback: (data) => {
+        this.props.syncAppDataToServer(data);
+      }
+    });
     this.props.toggleReviewModal(false);
   }
 

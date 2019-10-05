@@ -17,7 +17,11 @@ import {
 } from "./actionTypes";
 import { httpSyncAppData, httpRetrieveAppData } from '../apis/account';
 import { fetchPersistentData, savePersistentData } from '../services/LocalStorage';
-import { STORAGE_DATA_KEY, SIGNIN_TYPE_REGISTER, SIGNIN_TYPE_NORMAL } from '../configurations/Constants';
+import { 
+  STORAGE_DATA_KEY, 
+  SIGNIN_TYPE_REGISTER, 
+  SIGNIN_TYPE_NORMAL, 
+} from '../configurations/Constants';
 
 
 export const toggleSignInModal = (visibility) => ({
@@ -122,12 +126,10 @@ export const setSignInType = (value) => ({
 
 export const syncAppDataToServer = (data = false) => {
   return async (dispatch) => {
-    const payload = data || await fetchPersistentData(STORAGE_DATA_KEY, false);
+    const payload = data || await fetchPersistentData(STORAGE_DATA_KEY, { decodeJSON: false, });
     if (payload) {
       dispatch(toggleSyncingState(true));
-      const res = await httpSyncAppData({ 
-        data: payload,
-      });
+      const res = await httpSyncAppData({ data: payload });
       if (!res.data.tovdSyncAppData.result) {
         dispatch(setSignOutStatus());
       }
@@ -143,12 +145,12 @@ export const checkReviewState = () => {
     const duration = 1000 * 60 * 60 * 24;
     if ((now - lastSyncDate) >= duration) {
       const data = await fetchPersistentData(STORAGE_DATA_KEY);
-      const reviewData = data.filter(i => (((new Date().getTime() - Number(i.index)) >= duration) && (!i.rt || i.rt <= 5)));
-      if (reviewData.length > 0) {
+      const reviewDataIndex = data.filter(i => (((new Date().getTime() - Number(i.index)) >= duration) && (!i.rt || i.rt <= 5))).map(i => i.index);
+      if (reviewDataIndex.length > 0) {
         await dispatch(toggleNeedReviewState(true));
-        await dispatch(setReviewData(reviewData));
+        await dispatch(setReviewData(reviewDataIndex));
       } else {
-        // reset; 
+        // otherwise reset; 
         await dispatch(toggleNeedReviewState(false));
         await dispatch(setReviewData([]));
       }
@@ -169,7 +171,9 @@ export const syncAppDataAll = (callback = false) => {
         if (result) {  
           // new user sign in;
           const temp = data;
-          await savePersistentData(STORAGE_DATA_KEY, temp, false); 
+          await savePersistentData(STORAGE_DATA_KEY, temp, {
+            encodeJSON: false,
+          }); 
           // setup states for UI rendering;
           await dispatch(setInitializedData(JSON.parse(temp).data));
           await dispatch(toggleDataInitializedState(false));
