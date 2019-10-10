@@ -14,7 +14,7 @@ public class AppConstants {
   public static final String VERSION_NAME = "1.0.0";
   public static String INITIAL_URL = "exp://exp.host/@becavalier/TOVDiary";
   public static final String SHELL_APP_SCHEME = "exp8ffee82087494e8c83ae50a9b6bc08df";
-  public static final String RELEASE_CHANNEL = "prod-v1";
+  public static final String RELEASE_CHANNEL = "default";
   public static boolean SHOW_LOADING_VIEW_IN_SHELL_APP = true;
   public static boolean ARE_REMOTE_UPDATES_ENABLED = true;
   public static final List<Constants.EmbeddedResponse> EMBEDDED_RESPONSES;
@@ -56,10 +56,12 @@ public class AppConstants {
         
         
         
+        
+        
         // ADD EMBEDDED RESPONSES HERE
         // START EMBEDDED RESPONSES
         embeddedResponses.add(new Constants.EmbeddedResponse("https://exp.host/@becavalier/TOVDiary", "assets://shell-app-manifest.json", "application/json"));
-        embeddedResponses.add(new Constants.EmbeddedResponse("https://d1wp6m56sqw74a.cloudfront.net/%40becavalier%2FTOVDiary%2F1.0.1%2F81c102a9f2b567218210d864dbee1bdc-34.0.0-android.js", "assets://shell-app.bundle", "application/javascript"));
+        embeddedResponses.add(new Constants.EmbeddedResponse("https://d1wp6m56sqw74a.cloudfront.net/%40becavalier%2FTOVDiary%2F1.0.1%2F2822290e8c7ae3f3711c366b2b76ac35-34.0.0-android.js", "assets://shell-app.bundle", "application/javascript"));
         // END EMBEDDED RESPONSES
     EMBEDDED_RESPONSES = embeddedResponses;
   }

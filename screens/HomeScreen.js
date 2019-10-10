@@ -207,11 +207,11 @@ class HomeScreen extends React.PureComponent {
     if (!inputText) {
       return;
     }
+    const lang = await fetchPersistentData(STORAGE_LANG_KEY);
+    const translationText = await translate(inputText, { lang });
     const newItemRecord = {
       content: inputText,
-      translation: await translate(inputText, {
-        lang: await fetchPersistentData(STORAGE_LANG_KEY),
-      }),
+      translation: translationText,
       date: dayjs().format('YYYY-MM-DD'),
       type: 'normal',
       index: new Date().getTime(),
