@@ -72,12 +72,15 @@ const Navigator = connect(
           text: 'OK', 
           onPress: async () => {
             // logout;
-            this.props.syncAppDataAll(async () => {
-              const res = await httpSignOut();
-              const { result } = res.data.tovdSignOutAccount; 
-              if (result) {
-                this.props.setSignOutStatus();
-              }
+            this.props.syncAppDataAll({
+              type: 'SIGNOUT',
+              callback: async () => {
+                const res = await httpSignOut();
+                const { result } = res.data.tovdSignOutAccount; 
+                if (result) {
+                  this.props.setSignOutStatus();
+                }
+              },
             });
           }
         },
@@ -114,7 +117,7 @@ const Navigator = connect(
   }
   
   render() {
-    const { hasSignedIn, userInfo, isDataSyncing, modalVisible } = this.props;
+    const { hasSignedIn, userInfo, isDataSyncing } = this.props;
 
     return (
       <View style={styles.navigationBar}>
@@ -213,8 +216,8 @@ export default class LinksScreen extends React.PureComponent {
         />
         <Text style={styles.title}>TOVD</Text>
         <Text style={styles.meta}>"Enjoy practicing oral interpretation from your native language to English. "</Text>
-        <Text style={styles.meta}>Record & Recap</Text>
-        <Text style={styles.meta}>Version 1.0.1</Text>
+        <Text style={styles.meta}>Recording & Recalling</Text>
+        <Text style={styles.meta}>Version 1.0.2</Text>
         <Text style={styles.meta}>@YHSPY</Text>
         <View style={styles.operationArea}>
           <OperationPanel style={styles.operationPanelView} title="Native Language">

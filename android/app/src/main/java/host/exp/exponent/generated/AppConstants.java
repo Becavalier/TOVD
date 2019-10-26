@@ -11,7 +11,7 @@ import host.exp.exponent.Constants;
 @DoNotStrip
 public class AppConstants {
 
-  public static final String VERSION_NAME = "1.0.0";
+  public static final String VERSION_NAME = "1.0.2";
   public static String INITIAL_URL = "exp://exp.host/@becavalier/TOVDiary";
   public static final String SHELL_APP_SCHEME = "exp8ffee82087494e8c83ae50a9b6bc08df";
   public static final String RELEASE_CHANNEL = "default";
@@ -27,41 +27,10 @@ public class AppConstants {
         
         
         
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
         // ADD EMBEDDED RESPONSES HERE
         // START EMBEDDED RESPONSES
         embeddedResponses.add(new Constants.EmbeddedResponse("https://exp.host/@becavalier/TOVDiary", "assets://shell-app-manifest.json", "application/json"));
-        embeddedResponses.add(new Constants.EmbeddedResponse("https://d1wp6m56sqw74a.cloudfront.net/%40becavalier%2FTOVDiary%2F1.0.1%2F2822290e8c7ae3f3711c366b2b76ac35-34.0.0-android.js", "assets://shell-app.bundle", "application/javascript"));
+        embeddedResponses.add(new Constants.EmbeddedResponse("https://d1wp6m56sqw74a.cloudfront.net/%40becavalier%2FTOVDiary%2F1.0.2%2F1e5e837fc2f02a42df8c52c2477886e9-35.0.0-android.js", "assets://shell-app.bundle", "application/javascript"));
         // END EMBEDDED RESPONSES
     EMBEDDED_RESPONSES = embeddedResponses;
   }

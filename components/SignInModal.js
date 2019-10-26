@@ -10,7 +10,7 @@ import {
 import { connect } from 'react-redux';
 import { 
   toggleSignInModal,
-  setSignInStatus,
+  setSignInData,
   syncAppDataAll,
   setSignInType,
 } from "../redux/actions";
@@ -65,8 +65,8 @@ class SigninModal extends PureComponent {
           await savePersistentData(TOKEN_STORAGE_KEY, token);
           // change UI accordingly;
           this.props.setSignInType(SIGNIN_TYPE_NORMAL);
-          this.props.setSignInStatus({ username });
-          this.props.syncAppDataAll();
+          this.props.setSignInData({ username });
+          this.props.syncAppDataAll({ type: 'ONBOARD' });
           this.closeCurrentModal(); 
         } else {
           Alert.alert(
@@ -141,7 +141,7 @@ const mapStateToProps = (state /*, ownProps*/) => {
 
 const mapDispatchToProps = { 
   toggleSignInModal,
-  setSignInStatus,
+  setSignInData,
   syncAppDataAll,
   setSignInType,
 };

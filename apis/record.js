@@ -27,3 +27,17 @@ export const httpRemoveRecord = params => axios.post('/graphql', {
     }
   }
 });
+
+export const httpSyncReviewData = params => axios.post('/graphql', { 
+  query: `
+    mutation ($TOVDReviewDataJSON: TOVDReviewDataJSONInput!) {
+      tovdSyncReviewData(TOVDReviewDataJSON: $TOVDReviewDataJSON) {
+        result
+      }
+    }`,
+  variables: {
+    TOVDReviewDataJSON: {
+      ...params
+    }
+  }
+});

@@ -6,6 +6,7 @@ import {
   View, 
   StyleSheet,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
 import { connect } from 'react-redux';
 import { STORAGE_DATA_KEY } from '../configurations/Constants';
@@ -13,6 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { 
   savePersistentData,
 } from '../services/LocalStorage';
+import { httpSyncReviewData, } from '../apis/record';
 import { 
   toggleReviewModal,
   toggleNeedReviewState,
@@ -21,6 +23,7 @@ import {
 
 const initState = {
   reviewData: [],
+  changesMapper: {},
   counter: 0,
   tillLast: false,
   showTranslation: false,
@@ -47,8 +50,11 @@ class ReviewModal extends PureComponent {
 
   reviewNext = async () => {
     // change current state;
-    const { reviewData, counter } = this.state;
-    reviewData[counter].index = new Date().getTime();
+    const { reviewData, counter, changesMapper } = this.state;
+
+    const now = new Date().getTime();
+    changesMapper[reviewData[counter].index] = now;
+    reviewData[counter].index = now;
     if (reviewData[counter].rt) {
       reviewData[counter].rt = reviewData[counter].rt + 1;
     } else {
@@ -74,18 +80,29 @@ class ReviewModal extends PureComponent {
   }
 
   returnHome = async (reviewDone = true) => {
-    const { reviewData, counter } = this.state;
+    const { reviewData, counter, changesMapper } = this.state;
     const { initializedData } = this.props;
 
     if (reviewDone && counter === reviewData.length - 1) {
       this.props.toggleNeedReviewState(false);
     } 
-    // sync data;
+    
     await savePersistentData(STORAGE_DATA_KEY, initializedData, {
-      callback: (data) => {
-        this.props.syncAppDataToServer(data);
+      callback: async () => {
+        // sync data;
+        const { result } = (await httpSyncReviewData({ data: JSON.stringify(changesMapper) })).data.tovdSyncReviewData;
+        if (!result) {
+          Alert.alert(
+            'Alert',
+            'Reviewing data updated filed!',
+            {
+              cancelable: false
+            },
+          );
+        }
       }
     });
+
     this.props.toggleReviewModal(false);
   }
 

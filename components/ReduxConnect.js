@@ -4,9 +4,7 @@ import {
   KeyboardAvoidingView,
   AppState,
 } from 'react-native';
-import { httpTokenValidation } from '../apis/account';
 import { 
-  setSignInStatus, 
   syncAppDataAll,
 } from "../redux/actions";
 import Rate from 'react-native-rate';
@@ -27,19 +25,9 @@ export default connect(
   state => ({ 
     enableKeyboardAvoidingView: state.enableKeyboardAvoidingView, 
     hasPopRateUs: state.hasPopRateUs 
-  }), {
-    setSignInStatus, syncAppDataAll,
-  })
+  }), { syncAppDataAll })
   (function ReduxConnect(props) {
     let hasPopRateUs = false;
-    const syncTokenState = async () => {
-      const res = await httpTokenValidation();
-      const { result, username } = res.data.tovdTokenValidation;
-      if (result) {
-        props.setSignInStatus({ username });
-        props.syncAppDataAll();
-      }
-    };
   
     useEffect(() => {
       AppState.addEventListener('change', (nextAppState) => {
@@ -49,11 +37,13 @@ export default connect(
               hasPopRateUs = true;
             });
           }
+          // check app status;
+          props.syncAppDataAll();
         }
       });
 
       if (props.isLoadingComplete) {
-        syncTokenState();
+        props.syncAppDataAll({ type: 'KEEPALIVE' });
       }
     }, [props.isLoadingComplete]);
 

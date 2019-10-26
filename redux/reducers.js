@@ -4,6 +4,7 @@ import {
   TOGGLE_REVIEW_MODAL,
   TOGGLE_KEYBOARD_AVOIDING_VIEW,
   SET_SIGNIN_STATUS,
+  SET_SIGNIN_DATA,
   SET_SIGNOUT_STATUS,
   TOGGLE_SYNCING_STATE,
   SET_INITIALIZED_DATA,
@@ -11,7 +12,6 @@ import {
   TOGGLE_INITIALIZED_STATE,
   TOGGLE_NEED_REVIEW_FLAG,
   SET_REVIEW_DATA,
-  SET_LAST_SIGNIN_USERNAME,
   SET_SIGNIN_TYPE,
   TOGGLE_RATEUS_STATE,
 } from "./actionTypes";
@@ -24,7 +24,6 @@ const initialState = {
   hasSignedIn: false,
   isDataSyncing: false,
   userInfo: {},
-  lastSignInUsername: '',
   initializedData: [],
   hasDataInitialized: false,
   needReview: false,
@@ -72,11 +71,16 @@ export default function(state = initialState, action) {
         needReview: value
       };
     }
-    case SET_SIGNIN_STATUS: {
+    case SET_SIGNIN_DATA: {
       const { value } = action.payload;
       return {
         ...state,
         userInfo: value,
+      };
+    }
+    case SET_SIGNIN_STATUS: {
+      return {
+        ...state,
         hasSignedIn: true,
       };
     }
@@ -85,6 +89,7 @@ export default function(state = initialState, action) {
         ...state,
         userInfo: {},
         hasSignedIn: false,
+        lastSyncDate: 0,
       };
     }
     case TOGGLE_SYNCING_STATE: {
@@ -100,13 +105,6 @@ export default function(state = initialState, action) {
         ...state,
         initializedData: value,
         hasDataInitialized: true,
-      };
-    }
-    case SET_LAST_SIGNIN_USERNAME: {
-      const { value } = action.payload;
-      return {
-        ...state,
-        lastSignInUsername: value,
       };
     }
     case SET_LAST_SYNC_DATE: {

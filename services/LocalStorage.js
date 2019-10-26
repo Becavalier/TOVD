@@ -1,7 +1,7 @@
 import { AsyncStorage } from 'react-native';
 
 export const fetchPersistentData = async (key, { 
-  decodeJSON = true 
+  decodeJSON = true,
   } = {}) => {
   try {
     const value = await AsyncStorage.getItem(key);

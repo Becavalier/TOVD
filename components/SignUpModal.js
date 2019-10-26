@@ -16,7 +16,7 @@ import InputItem from './InputItem';
 import { savePersistentData } from '../services/LocalStorage';
 import { TOKEN_STORAGE_KEY, SIGNIN_TYPE_REGISTER } from '../configurations/Constants';
 import { 
-  setSignInStatus, 
+  setSignInData, 
   toggleSignUpModal,
   syncAppDataAll,
   setSignInType,
@@ -102,8 +102,8 @@ class SignupModal extends PureComponent {
                   await savePersistentData(TOKEN_STORAGE_KEY, token);
                   // change UI accordingly;
                   this.props.setSignInType(SIGNIN_TYPE_REGISTER);
-                  this.props.setSignInStatus({ username }); 
-                  this.props.syncAppDataAll();
+                  this.props.setSignInData({ username }); 
+                  this.props.syncAppDataAll({ type: 'ONBOARD' });
                   this.closeCurrentModal(); 
                 } else {
                   Alert.alert(
@@ -211,7 +211,7 @@ const mapStateToProps = (state /*, ownProps*/) => {
 
 const mapDispatchToProps = { 
   toggleSignUpModal, 
-  setSignInStatus, 
+  setSignInData, 
   syncAppDataAll,
   setSignInType,
 };

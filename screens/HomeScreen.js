@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import Icon from '../components/Icon';
 import { SwipeListView, SwipeRow } from 'react-native-swipe-list-view';
+import Toast from 'react-native-root-toast';
 import { Ionicons } from '@expo/vector-icons';
 import dayjs from 'dayjs'; 
 import translate from '../services/Translate';
@@ -35,6 +36,7 @@ import {
 import { httpInsertNewRecord, httpRemoveRecord } from '../apis/record';
 import animation from '../configurations/Animations';
 import { STORAGE_DATA_KEY } from '../configurations/Constants';
+import { throttle } from 'throttle-debounce';
 
 const STORAGE_LANG_KEY = 'TOVD_LANG';
 const INPUT_ACCESSORY_VIEW_ID = "INPUT_ACCESSORY_VIEW";
@@ -52,6 +54,7 @@ class HomeScreen extends React.PureComponent {
   constructor(props) {
     super(props);
 
+    this.throttleToastIns = [];
     this.sectionListRef = null;
     this.textInputRef = React.createRef();
     this.state = {
@@ -61,16 +64,49 @@ class HomeScreen extends React.PureComponent {
       storageRawData: [],
       sectionsData: [],
       keyboardOffset: 0,
+      currentTabActivated: true,
     };  
   }
+
+  throttleToast = throttle(100, (msg) => {
+    let v = msg;
+    const { currentTabActivated } = this.state;
+
+    if (Object.prototype.toString.call(msg) === '[object Function]') {
+      v = msg();
+    }
+
+    if (currentTabActivated) {
+      this.throttleToastIns.push(Toast.show(v, {
+        duration: 300,
+        position: -230,
+        shadow: false,
+        animation: false,
+        hideOnPress: false,
+        delay: 0,
+      }));
+    }
+  });
 
   componentDidMount = async () => {
     // page listeners;
     this.props.navigation.addListener('willFocus', e => {
+      this.setState({ 
+        currentTabActivated: true, 
+      });
       this.props.toggleKeyboardAvoidingView(false);
     });
 
     this.props.navigation.addListener('willBlur', e => {
+      this.setState({ 
+        currentTabActivated: false, 
+      });
+      // destroy toasts in current tab;
+      if (this.throttleToastIns.length > 0) {
+        this.throttleToastIns.forEach(i => {
+          i.destroy();
+        })
+      }
       this.props.toggleKeyboardAvoidingView(true);
     });
 
@@ -175,7 +211,7 @@ class HomeScreen extends React.PureComponent {
               data: JSON.stringify(item),
             })).data.tovdRemoveRecord;
             if (result) {
-              // remove element;
+              // remove element; 
               const rawDataUpdated = storageRawData.filter(i => i.index !== item.index);
 
               LayoutAnimation.configureNext(animation(200).layout.easeInEaseOut);
@@ -187,6 +223,8 @@ class HomeScreen extends React.PureComponent {
               // update;
               await savePersistentData(STORAGE_DATA_KEY, rawDataUpdated);
               this.props.syncAppDataAll();
+            } else {
+              this.props.setSignOutStatus();
             }
           }
         },
@@ -233,7 +271,9 @@ class HomeScreen extends React.PureComponent {
 
       // update;
       await savePersistentData(STORAGE_DATA_KEY, rawDataUpdated); 
-      await this.props.syncAppDataAll(); 
+      this.props.syncAppDataAll(); 
+    } else {
+      this.props.setSignOutStatus();
     }
   }
 
@@ -245,19 +285,29 @@ class HomeScreen extends React.PureComponent {
 
   handleScrollFailed = (e) => {}
 
+  handleScrolling = (e) => {
+    const { contentOffset, contentSize, layoutMeasurement } = e.nativeEvent;
+    const total = this.state.storageRawData.length;
+    const current = Math.round((contentOffset.y + layoutMeasurement.height) / contentSize.height * total)
+    this.throttleToast(() => {
+      return `${current} / ${total}`;
+    });
+  }
+
   showTrainingPage = () => {
     this.props.toggleReviewModal(true);
   }
 
   render() {
     const { sectionsData, inputText, keyboardOffset, onDataRefreshing } = this.state;
-    const { needReview } = this.props;
+    const { needReview, hasSignedIn } = this.props;
  
     return (
       <View style={styles.container}>
         { sectionsData.length > 0 ? <SwipeListView 
           style={styles.swipeListView}
           onScrollToIndexFailed={this.handleScrollFailed}
+          onScroll={this.handleScrolling}
           listViewRef={ref => this.sectionListRef = ref}
           refreshing={onDataRefreshing}
           onRefresh={this.initDataLoading}
@@ -297,7 +347,7 @@ class HomeScreen extends React.PureComponent {
                     : 'md-infinite'
                 }
               /></View>}
-        { needReview && 
+        { (hasSignedIn && needReview) && 
         <TouchableOpacity style={styles.reviewButton} onPress={this.showTrainingPage}>
           <Ionicons 
             name='ios-book'
@@ -412,18 +462,21 @@ const styles = StyleSheet.create({
   reviewButton: {
     flex: 1,
     position: 'absolute',
-    bottom: 80,
+    bottom: 75,
     backgroundColor: '#63b931',
     borderRadius: 10,
-    padding: 5,
-    width: 230,
+    paddingLeft: 5,
+    paddingRight: 5,
+    paddingTop: 8,
+    paddingBottom: 8,
+    width: 200,
     alignItems: 'center',
     justifyContent: 'center'
   },
   reviewButtonText: {
     color: 'white',
     fontWeight: 'bold',
-    fontSize: 20,
+    fontSize: 18,
   },
   inputArea: {
     shadowColor: 'rgba(0, 0, 0, .2)',
