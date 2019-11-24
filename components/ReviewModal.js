@@ -11,9 +11,7 @@ import {
 import { connect } from 'react-redux';
 import { STORAGE_DATA_KEY } from '../configurations/Constants';
 import { Ionicons } from '@expo/vector-icons';
-import { 
-  savePersistentData,
-} from '../services/LocalStorage';
+import { fetchPersistentData, savePersistentData } from '../services/LocalStorage';
 import { httpSyncReviewData, } from '../apis/record';
 import { 
   toggleReviewModal,
@@ -22,6 +20,7 @@ import {
 } from "../redux/actions";
 
 const initState = {
+  localData: [],
   reviewData: [],
   changesMapper: {},
   counter: 0,
@@ -39,10 +38,12 @@ class ReviewModal extends PureComponent {
     this.state = initState;
   }
 
-  componentWillReceiveProps(props) {
+  async componentWillReceiveProps(props) {
     if (props.reviewData && props.reviewData.length > 0) {
+      const localData = await fetchPersistentData(STORAGE_DATA_KEY);
       this.setState({
-        reviewData: props.initializedData.filter(i => props.reviewData.includes(i.index)),
+        localData,
+        reviewData: localData.filter(i => props.reviewData.includes(i.index)),
         reviewDataLength: props.reviewData.length,
       });
     }
@@ -80,28 +81,29 @@ class ReviewModal extends PureComponent {
   }
 
   returnHome = async (reviewDone = true) => {
-    const { reviewData, counter, changesMapper } = this.state;
-    const { initializedData } = this.props;
+    const { reviewData, counter, changesMapper, localData } = this.state;
 
     if (reviewDone && counter === reviewData.length - 1) {
       this.props.toggleNeedReviewState(false);
     } 
     
-    await savePersistentData(STORAGE_DATA_KEY, initializedData, {
-      callback: async () => {
-        // sync data;
-        const { result } = (await httpSyncReviewData({ data: JSON.stringify(changesMapper) })).data.tovdSyncReviewData;
-        if (!result) {
-          Alert.alert(
-            'Alert',
-            'Reviewing data updated filed!',
-            {
-              cancelable: false
-            },
-          );
+    if (counter !== 0) {
+      await savePersistentData(STORAGE_DATA_KEY, localData, {
+        callback: async () => {
+          // sync data;
+          const { result } = (await httpSyncReviewData({ data: JSON.stringify(changesMapper) })).data.tovdSyncReviewData;
+          if (!result) {
+            Alert.alert(
+              'Alert',
+              'Reviewing data updated filed!',
+              {
+                cancelable: false
+              },
+            );
+          }
         }
-      }
-    });
+      });
+    }
 
     this.props.toggleReviewModal(false);
   }
@@ -166,7 +168,6 @@ const mapStateToProps = (state /*, ownProps*/) => {
   return { 
     reviewModalVisibility: state.reviewModalVisibility,
     reviewData: state.reviewData,
-    initializedData: state.initializedData,
   };
 };
 
