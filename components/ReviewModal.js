@@ -38,13 +38,14 @@ class ReviewModal extends PureComponent {
     this.state = initState;
   }
 
-  async componentWillReceiveProps(props) {
-    if (props.reviewData && props.reviewData.length > 0) {
+  componentDidUpdate = async () => {
+    const { reviewData } = this.props;
+    if (reviewData && reviewData.length > 0) {
       const localData = await fetchPersistentData(STORAGE_DATA_KEY);
       this.setState({
         localData,
-        reviewData: localData.filter(i => props.reviewData.includes(i.index)),
-        reviewDataLength: props.reviewData.length,
+        reviewData: localData.filter(i => reviewData.includes(i.index)),
+        reviewDataLength: reviewData.length,
       });
     }
   }

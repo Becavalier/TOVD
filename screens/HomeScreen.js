@@ -135,6 +135,16 @@ class HomeScreen extends React.PureComponent {
   }
 
   componentDidUpdate = async () => {
+    const { initializedData, hasDataInitialized } = this.props; 
+    if (initializedData && !hasDataInitialized) {
+      this.setState({ 
+        sectionsData: formatInitData(initializedData, 'date'),
+        storageRawData: initializedData,
+        onDataRefreshing: false,
+      });
+      this.props.toggleDataInitializedState(true);
+    }
+
     // nexttick;
     setTimeout(() => {
       this.reachTheBottom(); 
@@ -157,18 +167,6 @@ class HomeScreen extends React.PureComponent {
         onDataRefreshing: false,
       });
     });
-  }
-
-  componentWillReceiveProps(props) {
-    const { initializedData, hasDataInitialized } = props; 
-    if (initializedData && !hasDataInitialized) {
-      this.setState({ 
-        sectionsData: formatInitData(initializedData, 'date'),
-        storageRawData: initializedData,
-        onDataRefreshing: false,
-      });
-      this.props.toggleDataInitializedState(true);
-    }
   }
 
   reachTheBottom = () => {
